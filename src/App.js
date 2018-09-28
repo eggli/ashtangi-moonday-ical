@@ -251,9 +251,11 @@ class App extends Component {
                     this.state.avoidPeakTime &&
                     this.checkPeakTime(moonday.time);
 
-                  const eventTime = moment(moonday.time)
-                    .add(1, 'days')
-                    .format('YYYY/MM/DD hh:mm');
+                  const eventTime = isInPeakTime
+                    ? moment(moonday.time)
+                        .add(1, 'days')
+                        .format('YYYY/MM/DD hh:mm')
+                    : moment(moonday.time).format('YYYY/MM/DD hh:mm');
 
                   return (
                     <tr key={moonday.time}>
