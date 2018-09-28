@@ -25,11 +25,8 @@ class App extends Component {
       upToYear: moment()
         .add(1, 'Y')
         .year(),
-      reminder: true,
-      reminderOptions: {
-        dateOffset: -1,
-        timeToReminder: '18:00'
-      }
+      reminder: false,
+      reminderOption: '12'
     };
   }
 
@@ -105,11 +102,31 @@ class App extends Component {
     const moondays = this.getMoondays();
     const cal = ical({ domain: 'eggli.github.io', name: 'Moondays' });
     moondays.forEach(moonday => {
-      cal.createEvent({
-        start: moonday.time,
+      const isInPeakTime =
+        this.state.avoidPeakTime && this.checkPeakTime(moonday.time);
+
+      const plusOne = isInPeakTime ? '+1' : '';
+
+      const eventTime = isInPeakTime
+        ? moment(moonday.time).add(1, 'days')
+        : moonday.time;
+
+      const event = cal.createEvent({
+        start: eventTime,
         allDay: true,
-        summary: moonday.phase + ' Moon'
+        summary: moonday.phase + ' Moon' + plusOne,
+        description: moonday.phase + ' Moon' + plusOne
       });
+
+      if (this.state.reminder) {
+        event.createAlarm({
+          type: 'display',
+          trigger: moment(eventTime).subtract(
+            Number(this.state.reminderOption),
+            'days'
+          )
+        });
+      }
     });
 
     const calstr = cal.toString();
@@ -193,6 +210,26 @@ class App extends Component {
               </Form.Text>
             </Form.Group>
           </Form>
+          {this.state.reminder ? (
+            <Form.Group controlId="reminderOption">
+              <Form.Label>
+                When should you get notified before moonday?
+              </Form.Label>
+              <Form.Control
+                as="select"
+                name="reminderOption"
+                value={this.state.reminderOption}
+                onChange={this.handleInputChange}
+              >
+                <option value={'1'}>One day</option>
+                <option value={'2'}>Two days</option>
+              </Form.Control>
+              <Form.Text className="text-muted">
+                You will be notifed on desired timing, e.g. Two days before
+                Moonday for night activities arrangement.
+              </Form.Text>
+            </Form.Group>
+          ) : null}
 
           <Button variant="primary" onClick={this.generateEvents}>
             Generate Calendar Events
@@ -214,10 +251,14 @@ class App extends Component {
                     this.state.avoidPeakTime &&
                     this.checkPeakTime(moonday.time);
 
+                  const eventTime = moment(moonday.time)
+                    .add(1, 'days')
+                    .format('YYYY/MM/DD hh:mm');
+
                   return (
                     <tr key={moonday.time}>
                       <td>{moonday.phase}</td>
-                      <td>{moment(moonday.time).format('YYYY/MM/DD hh:mm')}</td>
+                      <td>{eventTime}</td>
                       {this.state.avoidPeakTime ? (
                         <td>{isInPeakTime ? '+1' : ''}</td>
                       ) : null}
