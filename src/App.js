@@ -26,7 +26,7 @@ class App extends Component {
         .add(1, 'Y')
         .year(),
       reminder: false,
-      reminderOption: '12'
+      reminderOption: '1'
     };
   }
 
