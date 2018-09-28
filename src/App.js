@@ -100,7 +100,11 @@ class App extends Component {
 
   generateEvents = () => {
     const moondays = this.getMoondays();
-    const cal = ical({ domain: 'eggli.github.io', name: 'Moondays' });
+    const cal = ical({
+      domain: 'eggli.github.io',
+      name: 'Moondays',
+      timezone: moment.tz.guess()
+    });
     moondays.forEach(moonday => {
       const isInPeakTime =
         this.state.avoidPeakTime && this.checkPeakTime(moonday.time);
