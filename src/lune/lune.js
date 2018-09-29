@@ -8,8 +8,6 @@
  * Author: Ryan Seys (https://github.com/ryanseys)
  */
 
-'use strict';
-
 const julian = require('./julian');
 
 // Phases of the moon & precision
@@ -288,6 +286,8 @@ function truephase(k, tphase) {
       const sign = tphase < FULL ? +1 : -1;
       pt += sign * (0.0028 - 0.0004 * dcos(m) + 0.0003 * dcos(mprime));
 
+      break;
+    default:
       break;
   }
 

@@ -15,16 +15,23 @@ const practiceTimes = [...Array(48).keys()].map(key => {
   return time;
 });
 
+// const timezoneList = moment
+//   .tz
+//   .names();
+
 class App extends Component {
   constructor(props) {
     super(props);
+    // handle the case where we don't detect the browser
     this.state = {
-      timezone: new Date().getTimezoneOffset(),
-      avoidPeakTime: true,
+      timezone: moment.tz.guess(),
+      avoidPeakTime: false,
       practiceTime: '06:00',
-      upToYear: moment()
-        .add(1, 'Y')
-        .year(),
+      upToYear: String(
+        moment()
+          .add(1, 'Y')
+          .year()
+      ),
       reminder: false,
       reminderOption: '1'
     };
@@ -40,6 +47,7 @@ class App extends Component {
 
   getMoonPhases = phaseType => {
     const now = new Date();
+    // const now = new Date('2018-01-01T00:00:00.000Z');
     const upTo = new Date(this.state.upToYear + '-12-31T23:59:59.999Z');
 
     const phaseList = lune.phase_range(now, upTo, phaseType);
@@ -49,13 +57,13 @@ class App extends Component {
 
   getFullMoons = () => {
     return this.getMoonPhases(lune.PHASE_FULL).map(time => {
-      return { time, phase: 'Full' };
+      return { time, phase: '🌕Full' };
     });
   };
 
   getNewMoons = () => {
     return this.getMoonPhases(lune.PHASE_NEW).map(time => {
-      return { time, phase: 'New' };
+      return { time, phase: '🌑New' };
     });
   };
 
@@ -72,6 +80,7 @@ class App extends Component {
       }
       return 0;
     });
+    // console.log(moondays)
     return moondays;
   };
 
@@ -87,7 +96,7 @@ class App extends Component {
         peakTime.date() +
         ' ' +
         this.state.practiceTime,
-      'YYYY-MM-DD hh:mm'
+      'YYYY-MM-DD HH:mm'
     );
     const nextPracticeTime = moment(practiceTime).add(24, 'h');
 
@@ -103,7 +112,7 @@ class App extends Component {
     const cal = ical({
       domain: 'eggli.github.io',
       name: 'Moondays',
-      timezone: moment.tz.guess()
+      timezone: this.state.timezone
     });
     moondays.forEach(moonday => {
       const isInPeakTime =
@@ -149,6 +158,20 @@ class App extends Component {
             Namaste Ashtangis, this is a simple tool to generate Moondays as
             events with optional reminders on your calendar.
           </p>
+          <h2>Usage</h2>
+          <p>
+            Fill the forms below to create your own moonday calendar events,
+            click the 'Download Moonday Events' button to download desired
+            calendar events file, on mobile devices, it should be imported to
+            your calendar under your permission, on desktop computers, open the
+            downloaded file to import these events to your calendar.
+          </p>
+          <p>
+            <strong>
+              Please open this web page in Safari on iOS devices, otherwise, you
+              may see a blank page after download.
+            </strong>
+          </p>
 
           <Form>
             <Form.Group controlId="upToYear">
@@ -162,10 +185,25 @@ class App extends Component {
                 onChange={this.handleInputChange}
               />
               <Form.Text className="text-muted">
-                Type 2200 here and you will get moondays up to last day of year
-                2200.
+                Type&nbsp;
+                {moment().year() + 1}
+                &nbsp; here and you will get moondays up to last day of
+                year&nbsp;
+                {moment().year() + 1}.
               </Form.Text>
             </Form.Group>
+            {/* <Form.Group controlId="timezone">
+              <Form.Label>What's your timezone?</Form.Label>
+              <Form.Control
+                as="select"
+                name="timezone"
+                value={this.state.timezone}
+                onChange={this.handleInputChange}>
+                {timezoneList.map(timezone => {
+                  return <option key={timezone}>{timezone}</option>;
+                })}
+              </Form.Control>
+            </Form.Group> */}
             <Form.Group controlId="avoidPeakTime">
               <Form.Label>Avoid full/new phase peak time</Form.Label>
               <Form.Check
@@ -176,7 +214,8 @@ class App extends Component {
               />
               <Form.Text className="text-muted">
                 By checking this, full/new moon phases that too close to your
-                practice time will be shifted to next day.
+                practice time will be shifted to next day. Moondays that shifted
+                will be marked with a plus sign (+).
               </Form.Text>
             </Form.Group>
             {this.state.avoidPeakTime ? (
@@ -236,15 +275,18 @@ class App extends Component {
           ) : null}
 
           <Button variant="primary" onClick={this.generateEvents}>
-            Generate Calendar Events
+            Download Moonday Events
           </Button>
+          <p />
+          <h2>Questions? Suggestions?</h2>
+          <p>Contact me: aeggli@gmail.com</p>
           <h2>Moonday Events Preview</h2>
+          <p>Listing up to 50 moondays.</p>
           <Table striped bordered responsive>
             <thead>
               <tr>
                 <th>Moon Phase</th>
-                <th>Peak Time</th>
-                {this.state.avoidPeakTime ? <th>+1</th> : null}
+                <th>Date</th>
               </tr>
             </thead>
             <tbody>
@@ -258,16 +300,16 @@ class App extends Component {
                   const eventTime = isInPeakTime
                     ? moment(moonday.time)
                         .add(1, 'days')
-                        .format('YYYY/MM/DD hh:mm')
-                    : moment(moonday.time).format('YYYY/MM/DD hh:mm');
+                        .format('YYYY/MM/DD')
+                    : moment(moonday.time).format('YYYY/MM/DD');
 
                   return (
                     <tr key={moonday.time}>
-                      <td>{moonday.phase}</td>
+                      <td>
+                        {moonday.phase}
+                        {isInPeakTime ? '(+)' : ''}
+                      </td>
                       <td>{eventTime}</td>
-                      {this.state.avoidPeakTime ? (
-                        <td>{isInPeakTime ? '+1' : ''}</td>
-                      ) : null}
                     </tr>
                   );
                 })}
