@@ -125,11 +125,19 @@ class App extends Component {
         ? moment(moonday.time).add(1, 'days')
         : moonday.time;
 
+      const summary =
+        moonday.phase +
+        ' Moon' +
+        plusOne +
+        (this.state.showExactTime
+          ? '@' + moment(eventTime).format('HH:mm:ss')
+          : '');
+
       const event = cal.createEvent({
         start: eventTime,
         allDay: true,
-        summary: moonday.phase + ' Moon' + plusOne,
-        description: moonday.phase + ' Moon' + plusOne
+        summary,
+        description: summary
       });
 
       if (this.state.reminder) {
