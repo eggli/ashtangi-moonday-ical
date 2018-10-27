@@ -33,7 +33,8 @@ class App extends Component {
           .year()
       ),
       reminder: false,
-      reminderOption: '1'
+      reminderOption: '1',
+      showExactTime: false
     };
   }
 
@@ -150,6 +151,9 @@ class App extends Component {
   };
 
   render() {
+    const displayFormat = this.state.showExactTime
+      ? 'YYYY/MM/DD HH:mm:ss'
+      : 'YYYY/MM/DD';
     return (
       <Jumbotron>
         <Container>
@@ -204,6 +208,15 @@ class App extends Component {
                 })}
               </Form.Control>
             </Form.Group> */}
+            <Form.Group controlId="showExactTime">
+              <Form.Label>Show exact full/new phase peak time</Form.Label>
+              <Form.Check
+                type="checkbox"
+                name="showExactTime"
+                checked={this.state.showExactTime}
+                onChange={this.handleInputChange}
+              />
+            </Form.Group>
             <Form.Group controlId="avoidPeakTime">
               <Form.Label>Avoid full/new phase peak time</Form.Label>
               <Form.Check
@@ -300,8 +313,8 @@ class App extends Component {
                   const eventTime = isInPeakTime
                     ? moment(moonday.time)
                         .add(1, 'days')
-                        .format('YYYY/MM/DD')
-                    : moment(moonday.time).format('YYYY/MM/DD');
+                        .format(displayFormat)
+                    : moment(moonday.time).format(displayFormat);
 
                   return (
                     <tr key={moonday.time}>
