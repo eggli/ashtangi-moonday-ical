@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/ashtangi-moonday-ical/precache-manifest.709f147bc445134d34cdbfc0abce96d0.js"
+  "/ashtangi-moonday-ical/precache-manifest.4049d6fb08a794086e6dd49775c1ee35.js"
 );
 
 workbox.clientsClaim();
