@@ -36,7 +36,7 @@ class App extends Component {
     // handle the case where we don't detect the browser
     this.state = {
       timezone: moment.tz.guess(),
-      avoidPeakTime: true,
+      avoidPeakTime: false,
       practiceTime: '06:00',
       upToYear: String(
         moment()
@@ -45,7 +45,7 @@ class App extends Component {
       ),
       reminder: false,
       reminderOption: '1',
-      showExactTime: true
+      showExactTime: false
     };
   }
 
