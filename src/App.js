@@ -15,9 +15,20 @@ const practiceTimes = [...Array(48).keys()].map(key => {
   return time;
 });
 
-// const timezoneList = moment
-//   .tz
-//   .names();
+const AVOIDANCE_OPTIONS = {
+  '+1': {
+    label: '+',
+    getEventTime: peakTime => moment(peakTime).add(1, 'days')
+  },
+  '-1': {
+    label: '-',
+    getEventTime: peakTime => moment(peakTime).subtract(1, 'days')
+  },
+  '': {
+    label: '',
+    getEventTime: peakTime => moment(peakTime)
+  }
+};
 
 class App extends Component {
   constructor(props) {
@@ -25,7 +36,7 @@ class App extends Component {
     // handle the case where we don't detect the browser
     this.state = {
       timezone: moment.tz.guess(),
-      avoidPeakTime: false,
+      avoidPeakTime: true,
       practiceTime: '06:00',
       upToYear: String(
         moment()
@@ -34,7 +45,7 @@ class App extends Component {
       ),
       reminder: false,
       reminderOption: '1',
-      showExactTime: false
+      showExactTime: true
     };
   }
 
@@ -42,7 +53,6 @@ class App extends Component {
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
-
     this.setState({ [name]: value });
   };
 
@@ -85,10 +95,8 @@ class App extends Component {
     return moondays;
   };
 
-  checkPeakTime = time => {
+  getAvoidanceOptions = time => {
     const peakTime = moment(time);
-    const plus12 = moment(peakTime).add(12, 'h');
-
     const practiceTime = moment(
       peakTime.year() +
         '-' +
@@ -99,13 +107,39 @@ class App extends Component {
         this.state.practiceTime,
       'YYYY-MM-DD HH:mm'
     );
-    const nextPracticeTime = moment(practiceTime).add(24, 'h');
-
-    const isPracticeBetweenPeakTime = nextPracticeTime.isBetween(
-      peakTime,
-      plus12
-    );
-    return isPracticeBetweenPeakTime;
+    const previousPracticeTime = moment(practiceTime).subtract(24, 'hours');
+    const nextPracticeTime = moment(practiceTime).add(24, 'hours');
+    const practiceBeforePeakTime = {
+      diff: Math.abs(
+        moment.duration(moment(previousPracticeTime).diff(peakTime)).asHours()
+      ),
+      option: AVOIDANCE_OPTIONS['-1']
+    };
+    const practiceAtPeakTime = {
+      diff: Math.abs(
+        moment.duration(moment(practiceTime).diff(peakTime)).asHours()
+      ),
+      option: AVOIDANCE_OPTIONS['']
+    };
+    const practiceAfterPeakTime = {
+      diff: Math.abs(
+        moment.duration(moment(nextPracticeTime).diff(peakTime)).asHours()
+      ),
+      option: AVOIDANCE_OPTIONS['+1']
+    };
+    const options = [
+      practiceBeforePeakTime,
+      practiceAtPeakTime,
+      practiceAfterPeakTime
+    ];
+    console.log({ peakTime: peakTime.toString(), ...options });
+    const avoidanceOption = options.reduce((carry, option) => {
+      if (carry.diff > option.diff) {
+        return option;
+      }
+      return carry;
+    }, practiceAtPeakTime);
+    return avoidanceOption.option;
   };
 
   generateEvents = () => {
@@ -116,19 +150,18 @@ class App extends Component {
       timezone: this.state.timezone
     });
     moondays.forEach(moonday => {
-      const isInPeakTime =
-        this.state.avoidPeakTime && this.checkPeakTime(moonday.time);
+      const avoidanceOptions = this.getAvoidanceOptions(moonday.time);
+      const isInPeakTime = this.state.avoidPeakTime && avoidanceOptions;
 
-      const plusOne = isInPeakTime ? '+1' : '';
-
+      const label = isInPeakTime ? avoidanceOptions.label : '';
       const eventTime = isInPeakTime
-        ? moment(moonday.time).add(1, 'days')
+        ? avoidanceOptions.getEventTime(moonday.time)
         : moonday.time;
 
       const summary =
         moonday.phase +
         ' Moon' +
-        plusOne +
+        label +
         (this.state.showExactTime
           ? '@' + moment(eventTime).format('HH:mm:ss')
           : '');
@@ -204,18 +237,6 @@ class App extends Component {
                 {moment().year() + 1}.
               </Form.Text>
             </Form.Group>
-            {/* <Form.Group controlId="timezone">
-              <Form.Label>What's your timezone?</Form.Label>
-              <Form.Control
-                as="select"
-                name="timezone"
-                value={this.state.timezone}
-                onChange={this.handleInputChange}>
-                {timezoneList.map(timezone => {
-                  return <option key={timezone}>{timezone}</option>;
-                })}
-              </Form.Control>
-            </Form.Group> */}
             <Form.Group controlId="showExactTime">
               <Form.Label>Show exact full/new phase peak time</Form.Label>
               <Form.Check
@@ -236,7 +257,7 @@ class App extends Component {
               <Form.Text className="text-muted">
                 By checking this, full/new moon phases that too close to your
                 practice time will be shifted to next day. Moondays that shifted
-                will be marked with a plus sign (+).
+                will be marked with a plus sign (+) or a minus sign (-).
               </Form.Text>
             </Form.Group>
             {this.state.avoidPeakTime ? (
@@ -255,8 +276,8 @@ class App extends Component {
                 <Form.Text className="text-muted">
                   For example, a full moon peaked at 1st of April, 19:00 and
                   your practice time is 06:00 in the morning, that moonday will
-                  be shifted to 2nd of April due to it's too close (within 12
-                  hours) to your practice time.
+                  be shifted to 2nd of April or 31th of March due to it's too
+                  close (within 12 hours) to your practice time.
                 </Form.Text>
               </Form.Group>
             ) : null}
@@ -314,21 +335,22 @@ class App extends Component {
               {this.getMoondays()
                 .slice(0, 50)
                 .map(moonday => {
+                  const avoidanceOptions = this.getAvoidanceOptions(
+                    moonday.time
+                  );
                   const isInPeakTime =
-                    this.state.avoidPeakTime &&
-                    this.checkPeakTime(moonday.time);
+                    this.state.avoidPeakTime && avoidanceOptions;
 
                   const eventTime = isInPeakTime
-                    ? moment(moonday.time)
-                        .add(1, 'days')
+                    ? avoidanceOptions
+                        .getEventTime(moonday.time)
                         .format(displayFormat)
                     : moment(moonday.time).format(displayFormat);
-
                   return (
                     <tr key={moonday.time}>
                       <td>
                         {moonday.phase}
-                        {isInPeakTime ? '(+)' : ''}
+                        {isInPeakTime ? avoidanceOptions.label : ''}
                       </td>
                       <td>{eventTime}</td>
                     </tr>
