@@ -1,11 +1,11 @@
 self.__precacheManifest = [
   {
-    "revision": "081c69cf99be6ca9928b",
+    "revision": "93a775f387d8e9db55df",
     "url": "/ashtangi-moonday-ical/static/css/main.bf5481a4.chunk.css"
   },
   {
-    "revision": "081c69cf99be6ca9928b",
-    "url": "/ashtangi-moonday-ical/static/js/main.081c69cf.chunk.js"
+    "revision": "93a775f387d8e9db55df",
+    "url": "/ashtangi-moonday-ical/static/js/main.93a775f3.chunk.js"
   },
   {
     "revision": "7dddfd0bd4bda11bf226",
@@ -20,7 +20,7 @@ self.__precacheManifest = [
     "url": "/ashtangi-moonday-ical/static/js/runtime~main.597f1dba.js"
   },
   {
-    "revision": "ffd01ad81a740c4058700ea5b02e8c92",
+    "revision": "8a06cf317eb7fe89b1b08fb207224872",
     "url": "/ashtangi-moonday-ical/index.html"
   }
 ];
