@@ -132,7 +132,7 @@ class App extends Component {
       practiceAtPeakTime,
       practiceAfterPeakTime
     ];
-    console.log({ peakTime: peakTime.toString(), ...options });
+    // console.log({ peakTime: peakTime.toString(), ...options });
     const avoidanceOption = options.reduce((carry, option) => {
       if (carry.diff > option.diff) {
         return option;
