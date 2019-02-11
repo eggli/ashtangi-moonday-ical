@@ -205,7 +205,7 @@ class App extends Component {
           </p>
           <h2>Usage</h2>
           <p>
-            Fill the forms below to create your own moonday calendar events,
+            Fill the form below to create your own moonday calendar events,
             click the 'Download Moonday Events' button to download desired
             calendar events file, on mobile devices, it should be imported to
             your calendar under your permission, on desktop computers, open the
@@ -238,21 +238,21 @@ class App extends Component {
               </Form.Text>
             </Form.Group>
             <Form.Group controlId="showExactTime">
-              <Form.Label>Show exact full/new phase peak time</Form.Label>
               <Form.Check
                 type="checkbox"
                 name="showExactTime"
                 checked={this.state.showExactTime}
                 onChange={this.handleInputChange}
+                label="Show exact full/new phase peak time"
               />
             </Form.Group>
             <Form.Group controlId="avoidPeakTime">
-              <Form.Label>Avoid full/new phase peak time</Form.Label>
               <Form.Check
                 type="checkbox"
                 name="avoidPeakTime"
                 checked={this.state.avoidPeakTime}
                 onChange={this.handleInputChange}
+                label="Avoid full/new phase peak time"
               />
               <Form.Text className="text-muted">
                 By checking this, full/new moon phases that too close to your
@@ -282,12 +282,12 @@ class App extends Component {
               </Form.Group>
             ) : null}
             <Form.Group controlId="reminderOptions">
-              <Form.Label>Reminder Options</Form.Label>
               <Form.Check
                 type="checkbox"
                 name="reminder"
                 checked={this.state.reminder}
                 onChange={this.handleInputChange}
+                label="Reminder Options"
               />
               <Form.Text className="text-muted">
                 By checking this, a reminder will be set into moonday events,
